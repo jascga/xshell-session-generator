@@ -43,8 +43,8 @@ SendX=ssh {{HOST}}
 示例 `servers.csv`：
 ```csv
 SessionName,Host,Group
-web-01-10.1.1.1,10.1.1.1,北京四/az1/fa
-web-02-10.1.1.2,10.1.1.2,北京四/az1/fa
+web-01-10.1.1.1,10.1.1.1,b/1/a
+web-02-10.1.1.2,10.1.1.2,b/1/a
 ```
 
 ### 3. 运行
@@ -83,14 +83,14 @@ python xshell_gen.py generate 模板.xsh 服务器.csv --force
 
 ```bash
 # 交互式选择目标文件夹
-python xshell_gen.py update-pwd 北京四/az1/fa/sw01.xsh
+python xshell_gen.py update-pwd b/1/a/sw01.xsh
 
 # 命令行直接指定目标（跳过交互）
-python xshell_gen.py update-pwd 北京四/az1/fa/sw01.xsh -t 1,3-5
-python xshell_gen.py update-pwd 北京四/az1/fa/sw01.xsh -t all
+python xshell_gen.py update-pwd b/1/a/sw01.xsh -t 1,3-5
+python xshell_gen.py update-pwd b/1/a/sw01.xsh -t all
 
 # 预览（不实际修改）
-python xshell_gen.py update-pwd 北京四/az1/fa/sw01.xsh --dry-run
+python xshell_gen.py update-pwd b/1/a/sw01.xsh --dry-run
 ```
 
 参数说明：
@@ -105,11 +105,11 @@ python xshell_gen.py update-pwd 北京四/az1/fa/sw01.xsh --dry-run
 
 ```
 Sessions 目录: C:\Users\admin\Documents\NetSarang Computer\7\Xshell\Sessions
-源 session: C:\Users\admin\...\Sessions\北京四\az1\fa\sw01.xsh
+源 session: C:\Users\admin\...\Sessions\b\1\a\sw01.xsh
 已提取 Passphrase: Jd8kL2****
 
 第一层文件夹：
-  [1] 北京四              (12 个 session)
+  [1] 北京             (12 个 session)
   [2] 上海                (8 个 session)
   [3] 广州                (5 个 session)
   [a] 全部
