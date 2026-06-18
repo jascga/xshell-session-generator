@@ -63,7 +63,7 @@ AUTH_SECTION = '[CONNECTION:AUTHENTICATION]'
 
 def detect_encoding(filepath):
     """自动检测文件编码，依次尝试 utf-8、gbk、gb2312、utf-16"""
-    encodings = ['utf-8', 'gbk', 'gb2312', 'utf-16']
+    encodings = ['utf-8-sig', 'utf-8', 'gbk', 'gb2312', 'utf-16']
     for enc in encodings:
         try:
             with open(filepath, 'r', encoding=enc) as f:
@@ -91,14 +91,29 @@ def normalize_column_name(name):
     return COLUMN_MAP.get(name.strip().lower(), name.strip())
 
 
+def detect_delimiter(filepath, encoding):
+    """自动检测 CSV 分隔符（逗号/制表符/分号/竖线）"""
+    try:
+        with open(filepath, 'r', encoding=encoding, newline='') as f:
+            sample = f.read(8192)
+        dialect = csv.Sniffer().sniff(sample, delimiters=',;\t|')
+        return dialect.delimiter
+    except csv.Error:
+        return ','
+
+
 def read_csv_file(filepath):
-    """读取 CSV 文件，自动检测编码，列名映射"""
+    """读取 CSV 文件，自动检测编码、分隔符、列名映射"""
     encoding = detect_encoding(filepath)
     print(f'读取 CSV: {filepath} (编码: {encoding})')
 
+    delimiter = detect_delimiter(filepath, encoding)
+    if delimiter != ',':
+        print(f'自动检测分隔符: {delimiter!r}')
+
     rows = []
     with open(filepath, 'r', encoding=encoding, newline='') as f:
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f, delimiter=delimiter)
         if reader.fieldnames is None:
             raise ValueError('CSV 文件为空或格式错误')
 
