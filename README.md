@@ -37,17 +37,17 @@ SendX=ssh {{HOST}}
 | 列名 | 必填 | 说明 |
 |------|------|------|
 | 堡垒机 | ❌ | 堡垒机名称，为空则为直接登录 |
-| DeviceName | ✅ | 设备名称，格式 `设备名-IP`。如 `cnnorth1a-csw-26.5.4.6` |
+| DeviceName | ✅ | 设备名称，格式 `设备名-IP`。如 `cn-csw-1.1.1.1` |
 | Host | ✅ | 设备管理 IP，也用于替换 `{{HOST}}` |
-| Group | ❌ | 分组文件夹，`/` 分隔层级。如 `北京四/az1/fa` |
+| Group | ❌ | 分组文件夹，`/` 分隔层级。如 `北京/1/f` |
 
 **Session 文件名自动生成**：`{堡垒机}-{Host}@{设备名主体}.xsh`，无堡垒机时为 `{Host}@{设备名主体}.xsh`
 
 示例 `servers.csv`：
 ```csv
 堡垒机,DeviceName,Host,Group
-大云,cnnorth1a-csw-26.5.4.6,26.5.4.6,北京四/az1/fa
-大云,cnnorth1b-csw-26.5.4.7,26.5.4.7,北京四/az1/fb
+大云,cn-csw-1.1.1.6,1.1.1.6,A/az1/fa
+大云,cn-csw-1.1.1.7,1.1.1.7,A/az1/fb
 ,web-server-10.1.1.1,10.1.1.1,上海/web
 ```
 
