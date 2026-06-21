@@ -21,14 +21,20 @@ PLACEHOLDER_HOST = '{{HOST}}'
 
 # CSV 列名映射（中英文兼容）
 COLUMN_MAP = {
-    # SessionName
-    'sessionname': 'SessionName',
-    '会话名': 'SessionName',
-    '名称': 'SessionName',
-    '设备名': 'SessionName',
-    'name': 'SessionName',
-    'session': 'SessionName',
-    'session_name': 'SessionName',
+    # Jumpserver (堡垒机)
+    'jumpserver': 'Jumpserver',
+    '堡垒机': 'Jumpserver',
+    '跳板机': 'Jumpserver',
+    # DeviceName (设备名)
+    'devicename': 'DeviceName',
+    'device_name': 'DeviceName',
+    '设备名': 'DeviceName',
+    '名称': 'DeviceName',
+    'sessionname': 'DeviceName',
+    '会话名': 'DeviceName',
+    'name': 'DeviceName',
+    'session': 'DeviceName',
+    'session_name': 'DeviceName',
     # Host
     'host': 'Host',
     'ip': 'Host',
@@ -135,11 +141,18 @@ def read_csv_file(filepath):
 def validate_csv_rows(rows):
     """校验 CSV 数据"""
     errors = []
-    for i, row in enumerate(rows, start=2):  # 从第2行开始（第1行是表头）
-        if not row.get('SessionName'):
-            errors.append(f'第{i}行: SessionName 为空')
+    for i, row in enumerate(rows, start=2):
+        if not row.get('DeviceName'):
+            errors.append(f'第{i}行: DeviceName 为空')
         if not row.get('Host'):
             errors.append(f'第{i}行: Host 为空')
+        # 校验 DeviceName 格式（末尾需包含 -IP）
+        device = row.get('DeviceName', '')
+        if device and not IP_SUFFIX.search(device):
+            errors.append(
+                f'第{i}行: DeviceName "{device}" 格式不正确，'
+                f'期望格式: 设备名-IP（如 cnnorth1a-csw-26.5.4.6）'
+            )
     return errors
 
 
@@ -308,11 +321,15 @@ def cmd_generate(args):
     # 5. 逐行生成
     created, skipped = 0, 0
     for row in rows:
-        name = row['SessionName']
         host = row['Host']
+        device_name = row['DeviceName']
+        jumpserver = row.get('Jumpserver', '')
         group = row.get('Group', '')
 
         content = template.replace(PLACEHOLDER_HOST, host)
+
+        # 拼接 session 文件名：堡垒机-Host@设备名主体
+        session_name = make_session_name(jumpserver, device_name, host)
 
         # 确定输出路径
         if args.flat or not group:
@@ -320,12 +337,14 @@ def cmd_generate(args):
         else:
             out_dir = os.path.join(output_dir, *group.split('/'))
 
-        # 确保文件名合法
-        safe_name = _sanitize_filename(name)
+        safe_name = _sanitize_filename(session_name)
         out_path = os.path.join(out_dir, f'{safe_name}.xsh')
 
         if args.dry_run:
-            print(f'[预览] {out_path}  (Host={host})')
+            info = f'Host={host}'
+            if jumpserver:
+                info += f', 堡垒机={jumpserver}'
+            print(f'[预览] {out_path}  ({info})')
             created += 1
             continue
 
@@ -346,6 +365,29 @@ def cmd_generate(args):
 def _sanitize_filename(name):
     """移除文件名中的非法字符"""
     return re.sub(r'[<>:"/\\|?*]', '_', name)
+
+
+# DeviceName 末尾 -IP 匹配：设备名格式为 xxx-xxx-x.x.x.x
+IP_SUFFIX = re.compile(r'-(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$')
+
+
+def extract_device_body(device_name):
+    """从 'xxx-10.1.1.1' 中提取设备名主体 'xxx'"""
+    m = IP_SUFFIX.search(device_name)
+    if not m:
+        raise ValueError(
+            f'DeviceName "{device_name}" 格式不正确，'
+            f'期望格式: 设备名-IP（如 cnnorth1a-csw-26.5.4.6）'
+        )
+    return device_name[:m.start()]
+
+
+def make_session_name(jumpserver, device_name, host):
+    """拼接最终 session 文件名"""
+    body = extract_device_body(device_name)
+    if jumpserver:
+        return f'{jumpserver}-{host}@{body}'
+    return f'{host}@{body}'
 
 
 # ============================================================

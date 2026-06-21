@@ -36,15 +36,19 @@ SendX=ssh {{HOST}}
 
 | 列名 | 必填 | 说明 |
 |------|------|------|
-| SessionName | ✅ | 生成的 .xsh 文件名（不含扩展名） |
-| Host | ✅ | 设备管理 IP |
+| 堡垒机 | ❌ | 堡垒机名称，为空则为直接登录 |
+| DeviceName | ✅ | 设备名称，格式 `设备名-IP`。如 `cnnorth1a-csw-26.5.4.6` |
+| Host | ✅ | 设备管理 IP，也用于替换 `{{HOST}}` |
 | Group | ❌ | 分组文件夹，`/` 分隔层级。如 `北京四/az1/fa` |
+
+**Session 文件名自动生成**：`{堡垒机}-{Host}@{设备名主体}.xsh`，无堡垒机时为 `{Host}@{设备名主体}.xsh`
 
 示例 `servers.csv`：
 ```csv
-SessionName,Host,Group
-web-01-10.1.1.1,10.1.1.1,b/1/a
-web-02-10.1.1.2,10.1.1.2,b/1/a
+堡垒机,DeviceName,Host,Group
+大云,cnnorth1a-csw-26.5.4.6,26.5.4.6,北京四/az1/fa
+大云,cnnorth1b-csw-26.5.4.7,26.5.4.7,北京四/az1/fb
+,web-server-10.1.1.1,10.1.1.1,上海/web
 ```
 
 ### 3. 运行
@@ -132,6 +136,7 @@ CSV 列名支持中英文（大小写不敏感）：
 
 | 标准名 | 支持的列名 |
 |--------|-----------|
-| SessionName | sessionname, 会话名, 名称, 设备名, name |
+| Jumpserver | jumpserver, 堡垒机, 跳板机 |
+| DeviceName | devicename, device_name, 设备名, 名称, sessionname, name |
 | Host | host, ip, 管理ip, 地址, ip地址, hostip, 设备ip |
 | Group | group, 分组, 目录, folder |

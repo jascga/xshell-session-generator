@@ -1,0 +1,4 @@
+堡垒机,DeviceName,Host,Group
+大云,cnnorth1a-cnt-ce12808-csw-26.5.4.6,26.5.4.6,北京四/az1/fa
+大云,cnnorth1b-cnt-ce12808-csw-26.5.4.7,26.5.4.7,北京四/az1/fb
+,web-server-10.1.1.1,10.1.1.1,上海/web
