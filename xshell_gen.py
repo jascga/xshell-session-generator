@@ -371,23 +371,31 @@ def _sanitize_filename(name):
 IP_SUFFIX = re.compile(r'-(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$')
 
 
-def extract_device_body(device_name):
-    """从 'xxx-10.1.1.1' 中提取设备名主体 'xxx'"""
+def extract_device_info(device_name):
+    """从 'xxx-10.1.1.1' 中提取设备名主体 'xxx' 和 IP '10.1.1.1'"""
     m = IP_SUFFIX.search(device_name)
     if not m:
         raise ValueError(
             f'DeviceName "{device_name}" 格式不正确，'
             f'期望格式: 设备名-IP（如 cnnorth1a-csw-26.5.4.6）'
         )
-    return device_name[:m.start()]
+    body = device_name[:m.start()]
+    ip = m.group(1)
+    return body, ip
+
+
+def extract_device_body(device_name):
+    """从 'xxx-10.1.1.1' 中提取设备名主体 'xxx'（保持向后兼容）"""
+    body, _ = extract_device_info(device_name)
+    return body
 
 
 def make_session_name(jumpserver, device_name, host):
-    """拼接最终 session 文件名"""
-    body = extract_device_body(device_name)
+    """拼接最终 session 文件名（使用从 DeviceName 提取的 IP）"""
+    body, ip_from_devicename = extract_device_info(device_name)
     if jumpserver:
-        return f'{jumpserver}-{host}@{body}'
-    return f'{host}@{body}'
+        return f'{jumpserver}-{ip_from_devicename}@{body}'
+    return f'{ip_from_devicename}@{body}'
 
 
 # ============================================================
